@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": false,
+    "noUnusedLocals": false,
+    "strictNullChecks": false,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "outDir": "dist/server",
+    "sourceMap": true,
+    "typeRoots": ["typings", "node_modules/@types"]
+  },
+  "include": ["typings", "server", "src"],
+  "exclude": ["node_modules"]
+}
