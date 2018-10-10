@@ -1,13 +1,16 @@
 import * as React from "react"
-import { Label, ListGroup } from "react-bootstrap"
+import { Label, ListGroup, Button } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
+import QueryInput from "./QueryInput"
 
 export interface ComplexEventContainerProps {
-  complexEvents: { id: number; value: string; color: string }[]
+  complexEvents: { id: number; value: string; queryId: number }[]
+  queries: { id: number; value: string; color: string }[]
+  onCreateComplexEvent: (queryId: number, value: string) => void
 }
 
 export interface ComplexEventContainerState {
-  complexEvents: { id: number; value: string; color: string }[]
+  complexEvents: { id: number; value: string; queryId: number }[]
 }
 
 class ComplexEventContainer extends React.Component<
@@ -18,6 +21,12 @@ class ComplexEventContainer extends React.Component<
 
   componentWillReceiveProps(props: ComplexEventContainerProps) {
     this.setState({ complexEvents: props.complexEvents })
+  }
+
+  addComplexEvent = () => {
+    // This method will be a listener
+    // Params: queryId, value
+    this.props.onCreateComplexEvent(1, "Complex Event")
   }
 
   render() {
@@ -39,23 +48,24 @@ class ComplexEventContainer extends React.Component<
                 style={{
                   display: "inline-block",
                   margin: "5px",
-                  background: complexEvent.color,
+                  background: this.props.queries.filter(
+                    query => query.id == complexEvent.queryId,
+                  )[0].color,
                 }}
                 key={complexEvent.id}
               >
                 <h4 className="list-group-item-heading">
-                  Complex Event {complexEvent.id}
+                  Complex Event {complexEvent.id} for Query{" "}
+                  {complexEvent.queryId}
                 </h4>
                 <p className="list-group-item-text">
-                  <ComplexEvent
-                    value={complexEvent.value}
-                    color={complexEvent.color}
-                  />
+                  <ComplexEvent value={complexEvent.value} />
                 </p>
               </a>
             ))}
           </ListGroup>
         </div>
+        <Button onClick={this.addComplexEvent}>Add Complex Event</Button>
       </div>
     )
   }

@@ -2,7 +2,6 @@ import * as React from "react"
 
 export interface ComplexEventProps {
   value: string
-  color: string
 }
 
 export interface ComplexEventState {}
