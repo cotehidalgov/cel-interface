@@ -2,6 +2,7 @@ import * as React from "react"
 
 export interface QueryProps {
   value: string
+  color: string
 }
 
 export interface QueryState {}

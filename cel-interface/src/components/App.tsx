@@ -8,39 +8,39 @@ import { Row, Col, Label } from "react-bootstrap"
 export interface AppProps {}
 
 export interface AppState {
-  queries: { id: number; value: string }[]
-  complexEvents: { id: number; value: string }[]
+  queries: { id: number; value: string; color: string }[]
+  complexEvents: { id: number; value: string; color: string }[]
 }
 
 class App extends React.Component<AppProps, AppState> {
   idNumber: number = 6
   state = {
     queries: [
-      { id: 1, value: "Query 1" },
-      { id: 2, value: "Query 2" },
-      { id: 3, value: "Query 3" },
-      { id: 4, value: "Query 4" },
-      { id: 5, value: "Query 5" },
+      { id: 1, value: "SELECT ALL T FROM STREAM", color: "#A0C0E8" },
+      { id: 2, value: "SELECT ANY (H, T) FROM STREAM", color: "#939EAB" },
+      { id: 3, value: "SELECT ALL (H, T) FROM STREAM", color: "#89A2C1" },
+      { id: 4, value: "SELECT T FROM STREAM", color: "#BFC4CB" },
+      { id: 5, value: "SELECT MAX T FROM STREAM", color: "#9AC3F7" },
     ],
     complexEvents: [
-      { id: 1, value: "ComplexEvent 1" },
-      { id: 2, value: "ComplexEvent 2" },
-      { id: 3, value: "ComplexEvent 3" },
-      { id: 4, value: "ComplexEvent 4" },
-      { id: 5, value: "ComplexEvent 5" },
-      { id: 6, value: "ComplexEvent 6" },
-      { id: 7, value: "ComplexEvent 7" },
-      { id: 8, value: "ComplexEvent 8" },
-      { id: 9, value: "ComplexEvent 9" },
-      { id: 10, value: "ComplexEvent 2" },
-      { id: 11, value: "ComplexEvent 2" },
-      { id: 12, value: "ComplexEvent 2" },
+      { id: 1, value: "ComplexEvent 1", color: "#A0C0E8" },
+      { id: 2, value: "ComplexEvent 2", color: "#89A2C1" },
+      { id: 3, value: "ComplexEvent 3", color: "#939EAB" },
+      { id: 4, value: "ComplexEvent 4", color: "#BFC4CB" },
+      { id: 5, value: "ComplexEvent 5", color: "#A0C0E8" },
+      { id: 6, value: "ComplexEvent 6", color: "#939EAB" },
+      { id: 7, value: "ComplexEvent 7", color: "#9AC3F7" },
+      { id: 8, value: "ComplexEvent 8", color: "#89A2C1" },
+      { id: 9, value: "ComplexEvent 9", color: "#A0C0E8" },
+      { id: 10, value: "ComplexEvent 10", color: "#9AC3F7" },
+      { id: 11, value: "ComplexEvent 11", color: "#939EAB" },
+      { id: 12, value: "ComplexEvent 12", color: "#BFC4CB" },
     ],
   }
 
   handleCreateQuery = (queryInput: string) => {
     const queries = [...this.state.queries]
-    queries.push({ id: this.idNumber++, value: queryInput })
+    queries.push({ id: this.idNumber++, value: queryInput, color: "#BFC4CB" })
     this.setState({ queries })
   }
 
@@ -53,7 +53,7 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <div className="container">
         <h1>
-          <Label bsStyle="info">CEL Interface</Label>
+          <Label bsStyle="primary">CEL Interface</Label>
         </h1>
 
         <Row>

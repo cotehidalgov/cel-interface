@@ -3,11 +3,11 @@ import { Label, ListGroup } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 
 export interface ComplexEventContainerProps {
-  complexEvents: { id: number; value: string }[]
+  complexEvents: { id: number; value: string; color: string }[]
 }
 
 export interface ComplexEventContainerState {
-  complexEvents: { id: number; value: string }[]
+  complexEvents: { id: number; value: string; color: string }[]
 }
 
 class ComplexEventContainer extends React.Component<
@@ -29,21 +29,28 @@ class ComplexEventContainer extends React.Component<
 
         <div
           className="pre-x-scrollable"
-          style={{ height: "20vh", overflow: "auto" }}
+          style={{ height: "100px", width: "100%", overflow: "auto" }}
         >
           <ListGroup style={{ display: "inline-flex" }}>
             {this.state.complexEvents.map((complexEvent, idx) => (
               <a
                 href="#"
                 className="list-group-item"
-                style={{ display: "inline-block", margin: "5px" }}
+                style={{
+                  display: "inline-block",
+                  margin: "5px",
+                  background: complexEvent.color,
+                }}
                 key={complexEvent.id}
               >
                 <h4 className="list-group-item-heading">
                   Complex Event {complexEvent.id}
                 </h4>
                 <p className="list-group-item-text">
-                  <ComplexEvent value={complexEvent.value} />
+                  <ComplexEvent
+                    value={complexEvent.value}
+                    color={complexEvent.color}
+                  />
                 </p>
               </a>
             ))}

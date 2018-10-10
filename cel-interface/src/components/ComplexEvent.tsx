@@ -2,6 +2,7 @@ import * as React from "react"
 
 export interface ComplexEventProps {
   value: string
+  color: string
 }
 
 export interface ComplexEventState {}
@@ -10,7 +11,7 @@ class ComplexEvent extends React.Component<
   ComplexEventProps,
   ComplexEventState
 > {
-  state = { name: "Complex Event 1" }
+  // state = { name: "Complex Event 1" }
 
   render() {
     return (

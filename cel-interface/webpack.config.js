@@ -2,17 +2,18 @@ const path = require("path")
 const webpack = require("webpack")
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin")
 const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
+const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin")
 
 const SRC_DIR = path.join(__dirname, "src/")
 const ASSET_PATH = "assets/"
-const DIST_DIR = path.resolve(__dirname, "dist")
+const DIST_DIR = path.resolve(__dirname, "dist/public")
 
 module.exports = {
   entry: {
     bundle: `${SRC_DIR}index.tsx`,
   },
   output: {
-    filename: "public/[name].js",
+    filename: "js/[name].js",
     path: DIST_DIR,
   },
 
@@ -25,6 +26,11 @@ module.exports = {
 
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+
       {
         test: /\.tsx?$/,
         use: {
@@ -58,6 +64,7 @@ module.exports = {
     // new WebpackBundleAnalyzer.BundleAnalyzerPlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new MonacoWebpackPlugin(),
   ],
   optimization: {
     runtimeChunk: false,
