@@ -2,6 +2,7 @@ import * as React from "react"
 import { Label, ListGroup, Button } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 import QueryInput from "./QueryInput"
+import { setInterval } from "timers"
 
 export interface ComplexEventContainerProps {
   complexEvents: { id: number; value: string; queryId: number }[]
@@ -23,6 +24,25 @@ class ComplexEventContainer extends React.Component<
     this.setState({ complexEvents: props.complexEvents })
   }
 
+  componentDidMount() {
+    const script = document.createElement("script")
+    script.type = "text/javascript"
+    script.async = true
+    // s.innerHTML = "document.write('This is output by document.write()!')"
+    // this.instance.appendChild(s)
+
+    function addDivs() {
+      var cont = document.getElementsByClassName("container")[0]
+      var str = '<div class="inner">Hi</div>'
+      cont.innerHTML += str
+    }
+
+    // setInterval(function() {
+    //   addDivs()
+    // }, 1000)
+    document.body.appendChild(script)
+  }
+
   addComplexEvent = () => {
     // This method will be a listener
     // Params: queryId, value
@@ -40,7 +60,12 @@ class ComplexEventContainer extends React.Component<
           className="pre-x-scrollable"
           style={{ height: "100px", width: "100%", overflow: "auto" }}
         >
-          <ListGroup style={{ display: "inline-flex" }}>
+          <ListGroup
+            style={{
+              display: "inline-flex",
+              flexDirection: "row-reverse",
+            }}
+          >
             {this.state.complexEvents.map((complexEvent, idx) => (
               <a
                 href="#"

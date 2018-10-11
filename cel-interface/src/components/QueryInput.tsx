@@ -1,57 +1,55 @@
 import * as React from "react"
-import {
-  FormGroup,
-  ControlLabel,
-  FormControl,
-  Button,
-  Label,
-} from "react-bootstrap"
-import { Container } from "react-bootstrap/lib/Tab"
+import { Button, Label, FormGroup, FormControl } from "react-bootstrap"
 import * as monacoEditor from "react-monaco-editor"
 import MonacoEditor from "react-monaco-editor"
-import { CEL_FORMAT, CEL_THEME } from "../cel"
+import { CEL_FORMAT, CEL_CONF, CEL_THEME } from "../cel"
 
 export interface QueryInputProps {
-  onCreateQuery: (queryInput: string) => void
+  onCreateQuery: (queryInput: string, queryDescription: string) => void
 }
 
 export interface QueryInputState {
-  code: string
+  queryInput: string
 }
 
 class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
-  // state = { queryInput: false }
-  queryInput: HTMLInputElement
-  state = { code: "" }
+  state = { queryInput: "" }
+  queryDescriptionInput: HTMLInputElement
 
   addQuery = () => {
-    if (this.state.code) {
-      this.props.onCreateQuery(this.state.code)
-      this.state.code = ""
+    if (this.queryDescriptionInput.value && this.state.queryInput) {
+      this.props.onCreateQuery(
+        this.state.queryInput,
+        this.queryDescriptionInput.value,
+      )
+      this.state.queryInput = ""
+      this.queryDescriptionInput.value = ""
     }
   }
 
   editorWillMount: monacoEditor.EditorWillMount = monaco => {
     monaco.languages.register({ id: "cel" })
     monaco.languages.setMonarchTokensProvider("cel", CEL_FORMAT)
-    monaco.editor.defineTheme("draco-light", CEL_THEME)
+    monaco.languages.setLanguageConfiguration("cel", CEL_CONF)
+    monaco.editor.defineTheme("vs-light", CEL_THEME)
   }
 
-  editorDidMount: monacoEditor.EditorDidMount = (editor, monaco) => {
+  editorDidMount: monacoEditor.EditorDidMount = editor => {
     editor.focus()
   }
 
   onChange: monacoEditor.ChangeHandler = (newValue, e) => {
-    this.state.code = newValue
+    this.state.queryInput = newValue
   }
 
   render() {
-    const code = this.state.code
+    const queryInput = this.state.queryInput
     const options = {
       selectOnLineNumbers: true,
       autoIndent: true,
       colorDecorators: true,
       scrollBeyondLastLine: false,
+      matchBrackets: true,
     }
     return (
       <div>
@@ -59,17 +57,28 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
           <Label bsStyle="default">Write your Query!</Label>
         </h2>
 
-        <MonacoEditor
-          width="500"
-          height="300"
-          theme="draco-light"
-          language="cel"
-          value={code}
-          options={options}
-          onChange={this.onChange}
-          editorDidMount={this.editorDidMount}
-          editorWillMount={this.editorWillMount}
-        />
+        <FormGroup controlId="formControlsTextarea">
+          <MonacoEditor
+            width="500"
+            height="150"
+            theme="vs-light"
+            language="cel"
+            value={queryInput}
+            options={options}
+            onChange={this.onChange}
+            editorDidMount={this.editorDidMount}
+            editorWillMount={this.editorWillMount}
+          />
+          <br />
+          <FormControl
+            bsSize="small"
+            style={{ resize: "none", height: "10vh", width: "40vw" }}
+            componentClass="textarea"
+            placeholder="Query description..."
+            inputRef={input => (this.queryDescriptionInput = input)}
+          />
+        </FormGroup>
+
         <Button onClick={this.addQuery}>Add query</Button>
       </div>
     )

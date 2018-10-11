@@ -1,18 +1,38 @@
 import * as monacoEditor from "monaco-editor"
 
+export const CEL_CONF: any = {
+  comments: {
+    lineComment: "--",
+    blockComment: ["/*", "*/"],
+  },
+  brackets: [["{", "}"], ["[", "]"], ["(", ")"]],
+  autoClosingPairs: [
+    { open: "{", close: "}" },
+    { open: "[", close: "]" },
+    { open: "(", close: ")" },
+    { open: '"', close: '"' },
+    { open: "'", close: "'" },
+  ],
+  surroundingPairs: [
+    { open: "{", close: "}" },
+    { open: "[", close: "]" },
+    { open: "(", close: ")" },
+    { open: '"', close: '"' },
+    { open: "'", close: "'" },
+  ],
+}
+
 export const CEL_FORMAT: any = {
   defaultToken: "",
   ignoreCase: true,
 
-  brackets: [
-    { open: "{", close: "}", token: "delimiter.curly" },
-    { open: "[", close: "]", token: "delimiter.square" },
-    { open: "(", close: ")", token: "delimiter.parenthesis" },
-  ],
+  // brackets: [
+  //   { open: "{", close: "}", token: "delimiter.curly" },
+  //   { open: "[", close: "]", token: "delimiter.square" },
+  //   { open: "(", close: ")", token: "delimiter.parenthesis" },
+  // ],
 
   keywords: [
-    "ALL",
-    "ANY",
     "AS",
     "BY",
     "CONSUME",
@@ -23,23 +43,34 @@ export const CEL_FORMAT: any = {
     "FILTER",
     "FROM",
     "HOURS",
-    "LAST",
     "LIKE",
-    "MAX",
     "MINUTES",
-    "NEXT",
-    "NONE",
-    "PARTITION",
     "SECONDS",
     "SELECT",
     "STREAM",
-    "STRICT",
     "UNLESS",
     "WHERE",
     "WITHIN",
   ],
 
-  operators: ["AND", "NOT", "OR", "IS", "IN"],
+  operators: [
+    // Selection strategy
+    "ALL",
+    "LAST",
+    "MAX",
+    "NEXT",
+    "STRICT",
+    // Operators
+    "AND",
+    "NOT",
+    "OR",
+    "IS",
+    "IN",
+    // Consumption Policy
+    "ANY",
+    "NONE",
+    "PARTITION",
+  ],
   builtinFunctions: [
     // NOT SUPPORTED
   ],
@@ -134,5 +165,3 @@ export const CEL_THEME: monacoEditor.editor.IStandaloneThemeData = {
     "editor.lineHighlightBackground": "#f9fcff",
   },
 }
-
-export default CEL_FORMAT

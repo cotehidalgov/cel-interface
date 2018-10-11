@@ -3,7 +3,7 @@ import Query from "./Query"
 import { Label, ListGroup, ListGroupItem, Button } from "react-bootstrap"
 
 export interface QueryListProps {
-  queries: { id: number; value: string; color: string }[]
+  queries: { id: number; value: string; color: string; description: string }[]
   onDelete: (id: number) => void
 }
 
@@ -47,7 +47,8 @@ class QueryList extends React.Component<QueryListProps, QueryListState> {
                 >
                   Delete
                 </button>
-                <h4 className="list-group-item-heading">Query {query.id}</h4>
+                <h4 className="list-group-item-heading">{query.description}</h4>
+
                 <p className="list-group-item-text">
                   <Query value={query.value} color={query.color} />
                 </p>

@@ -10,20 +10,8 @@ class ComplexEvent extends React.Component<
   ComplexEventProps,
   ComplexEventState
 > {
-  // state = { name: "Complex Event 1" }
-
   render() {
-    return (
-      <div>
-        {this.props.value.split("\n").map(line => (
-          <React.Fragment>
-            <div style={{ width: "20vh" }}>
-              {line} <br />
-            </div>
-          </React.Fragment>
-        ))}
-      </div>
-    )
+    return <div>{this.props.value}</div>
   }
 }
 

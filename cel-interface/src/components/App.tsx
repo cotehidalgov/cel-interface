@@ -8,7 +8,7 @@ import { Row, Col, Label } from "react-bootstrap"
 export interface AppProps {}
 
 export interface AppState {
-  queries: { id: number; value: string; color: string }[]
+  queries: { id: number; value: string; color: string; description: string }[]
   complexEvents: { id: number; value: string; queryId: number }[]
 }
 
@@ -18,11 +18,36 @@ class App extends React.Component<AppProps, AppState> {
 
   state = {
     queries: [
-      { id: 1, value: "SELECT ALL T FROM STREAM", color: "#A0C0E8" },
-      { id: 2, value: "SELECT ANY (H, T) FROM STREAM", color: "#939EAB" },
-      { id: 3, value: "SELECT ALL (H, T) FROM STREAM", color: "#89A2C1" },
-      { id: 4, value: "SELECT T FROM STREAM", color: "#BFC4CB" },
-      { id: 5, value: "SELECT MAX T FROM STREAM", color: "#9AC3F7" },
+      {
+        id: 1,
+        value: "SELECT ALL T FROM STREAM",
+        color: "#A0C0E8",
+        description: "Query",
+      },
+      {
+        id: 2,
+        value: "SELECT (H, T) FROM STREAM",
+        color: "#939EAB",
+        description: "Query",
+      },
+      {
+        id: 3,
+        value: "SELECT ALL (H, T) FROM STREAM",
+        color: "#89A2C1",
+        description: "Query",
+      },
+      {
+        id: 4,
+        value: "SELECT T FROM STREAM",
+        color: "#BFC4CB",
+        description: "Query",
+      },
+      {
+        id: 5,
+        value: "SELECT MAX T FROM STREAM",
+        color: "#9AC3F7",
+        description: "Query",
+      },
     ],
     complexEvents: [
       { id: 1, value: "ComplexEvent 1", queryId: 1 },
@@ -40,12 +65,13 @@ class App extends React.Component<AppProps, AppState> {
     ],
   }
 
-  handleCreateQuery = (queryInput: string) => {
+  handleCreateQuery = (queryInput: string, queryDescription: string) => {
     const queries = [...this.state.queries]
     queries.push({
       id: this.queryNumber++,
       value: queryInput,
       color: "#BFC4CB",
+      description: queryDescription,
     })
     this.setState({ queries })
   }
