@@ -11,11 +11,10 @@ export interface QueryInputProps {
 
 export interface QueryInputState {
   queryInput: string
-  shown: boolean
 }
 
 class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
-  state = { queryInput: "", shown: true }
+  state = { queryInput: "" }
   queryDescriptionInput: HTMLInputElement
 
   addQuery = () => {
@@ -83,11 +82,11 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
           </Col>
         </div>
       )
-    }
+    } else return <div />
   }
 
   render() {
-    return <div>{this.renderQueryInput()}</div>
+    return this.renderQueryInput()
   }
 }
 

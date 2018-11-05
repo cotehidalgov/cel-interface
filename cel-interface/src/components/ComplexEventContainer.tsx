@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Label, ListGroup, Button } from "react-bootstrap"
+import { Label, ListGroup, Button, PanelGroup, Panel } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 import QueryInput from "./QueryInput"
 import { setInterval } from "timers"
@@ -8,17 +8,19 @@ export interface ComplexEventContainerProps {
   complexEvents: { id: number; value: string; queryId: number }[]
   queries: { id: number; value: string; color: string }[]
   onCreateComplexEvent: (queryId: number, value: string) => void
+  onComplexEventSelection: (id: number) => void
 }
 
 export interface ComplexEventContainerState {
   complexEvents: { id: number; value: string; queryId: number }[]
+  activeKey: number
 }
 
 class ComplexEventContainer extends React.Component<
   ComplexEventContainerProps,
   ComplexEventContainerState
 > {
-  state = { complexEvents: this.props.complexEvents }
+  state = { complexEvents: this.props.complexEvents, activeKey: 0 }
 
   componentWillReceiveProps(props: ComplexEventContainerProps) {
     this.setState({ complexEvents: props.complexEvents })
@@ -41,10 +43,82 @@ class ComplexEventContainer extends React.Component<
     // document.body.appendChild(script)
   }
 
+  handleSelection = (activeKey: number) => {
+    if (this.state.activeKey != 0) {
+      activeKey = 0
+    }
+    this.setState({ activeKey })
+    this.props.onComplexEventSelection(activeKey)
+  }
+
   addComplexEvent = () => {
     // This method will be a listener
     // Params: queryId, value
     this.props.onCreateComplexEvent(1, "Complex Event")
+  }
+
+  // getStyles = () => {
+  //   let style = {
+  //     display: "inline-flex",
+  //     // flexDirection: "row-reverse",
+  //   }
+  //   if (this.state.activeKey === 0) {
+  //     return style
+  //   }
+  //   let style2 = {
+  //     display: "inline-flex",
+  //     flexDirection: "row-reverse",
+  //     width: "100%",
+  //     height: "100%",
+  //   }
+  //   return style2
+  // }
+
+  getWidth = () => {
+    if (this.state.activeKey === 0) {
+      return ""
+    }
+    return "100%"
+  }
+
+  getHeight = () => {
+    if (this.state.activeKey === 0) {
+      return ""
+    }
+    return "100%"
+  }
+
+  renderPanels(complexEvent: { id: number; queryId: number; value: string }) {
+    if (
+      this.state.activeKey === complexEvent.id ||
+      this.state.activeKey === 0
+    ) {
+      return (
+        <Panel
+          eventKey={complexEvent.id}
+          style={{
+            display: "inline-block",
+            margin: "5px",
+            width: this.getWidth(),
+          }}
+        >
+          <Panel.Heading
+            style={{
+              background: this.props.queries.filter(
+                query => query.id == complexEvent.queryId,
+              )[0].color,
+            }}
+          >
+            <Panel.Title toggle>
+              Complex Event {complexEvent.id} for Query {complexEvent.queryId}
+            </Panel.Title>
+          </Panel.Heading>
+          <Panel.Body collapsible style={{ height: "40vh" }}>
+            <ComplexEvent value={complexEvent.value} />
+          </Panel.Body>
+        </Panel>
+      )
+    } else return <div />
   }
 
   render() {
@@ -56,37 +130,23 @@ class ComplexEventContainer extends React.Component<
 
         <div
           className="pre-x-scrollable"
-          style={{ height: "100px", width: "100%", overflow: "auto" }}
+          style={{ height: "100%", width: "100%", overflow: "auto" }}
         >
-          <ListGroup
+          <PanelGroup
+            accordion
+            id="accordion-controlled-example"
+            activeKey={this.state.activeKey}
+            onSelect={this.handleSelection}
             style={{
               display: "inline-flex",
               flexDirection: "row-reverse",
+              width: this.getWidth(),
             }}
           >
-            {this.state.complexEvents.map((complexEvent, idx) => (
-              <a
-                href="#"
-                className="list-group-item"
-                style={{
-                  display: "inline-block",
-                  margin: "5px",
-                  background: this.props.queries.filter(
-                    query => query.id == complexEvent.queryId,
-                  )[0].color,
-                }}
-                key={complexEvent.id}
-              >
-                <h4 className="list-group-item-heading">
-                  Complex Event {complexEvent.id} for Query{" "}
-                  {complexEvent.queryId}
-                </h4>
-                <p className="list-group-item-text">
-                  <ComplexEvent value={complexEvent.value} />
-                </p>
-              </a>
-            ))}
-          </ListGroup>
+            {this.state.complexEvents.map(complexEvent =>
+              this.renderPanels(complexEvent),
+            )}
+          </PanelGroup>
         </div>
         <Button onClick={this.addComplexEvent}>Add Complex Event</Button>
       </div>

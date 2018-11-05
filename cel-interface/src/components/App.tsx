@@ -12,22 +12,23 @@ export interface AppState {
   queries: { id: number; value: string; color: string; description: string }[]
   complexEvents: { id: number; value: string; queryId: number }[]
   showQueryInput: boolean
+  showQueryList: boolean
 }
 
 class App extends React.Component<AppProps, AppState> {
-  queryNumber: number = 6
-  complexEventsNumber: number = 13
+  queryNumber: number = 10
+  complexEventNumber: number = 13
 
-  data = this.createData()
+  data = this.createData(this.queryNumber, this.complexEventNumber)
 
   state = {
     queries: this.data.queries,
     complexEvents: this.data.complexEvents,
     showQueryInput: true,
+    showQueryList: true,
   }
 
-  createData() {
-    let queryNumber = 10
+  createData(queryNumber: number, complexEventNumber: number) {
     let value
     let description
     let color
@@ -44,7 +45,6 @@ class App extends React.Component<AppProps, AppState> {
       })
     }
 
-    let complexEventNumber = 13
     let queryId
     let complexEvents = []
     let queriesLength = queries.length
@@ -69,17 +69,23 @@ class App extends React.Component<AppProps, AppState> {
       "#89A2C1",
       "#BFC4CB",
       "#9AC3F7",
+      "#c0d6f9",
+      "#c4c9d1",
+      "#7e8a9e",
+      "#bcbcbc",
+      "#dbe7ff",
+      "#6a83b5",
     ]
 
     return colorValues[Math.floor(Math.random() * colorValues.length)]
   }
 
-  handleShowQueryInput = () => {
-    if (!this.state.showQueryInput) {
-      const showQueryInput = true
-      this.setState({ showQueryInput })
-      console.log(this.state.showQueryInput)
+  handleQuerySelection = (id: number) => {
+    let showQueryInput = false
+    if (id === 0) {
+      showQueryInput = true
     }
+    this.setState({ showQueryInput })
   }
 
   handleCreateQuery = (queryInput: string, queryDescription: string) => {
@@ -90,15 +96,8 @@ class App extends React.Component<AppProps, AppState> {
       color: this.getRandomColor(),
       description: queryDescription,
     })
+    console.log(this.queryNumber)
     this.setState({ queries })
-  }
-
-  handleQuerySelection = (id: number) => {
-    let showQueryInput = false
-    if (id === 0) {
-      showQueryInput = true
-    }
-    this.setState({ showQueryInput })
   }
 
   handleDeleteQuery = (id: number) => {
@@ -113,10 +112,22 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ showQueryInput })
   }
 
+  // bug: press query and then ce
+  handleComplexEventSelection = (id: number) => {
+    let showQueryList = false
+    let showQueryInput = false
+    if (id === 0) {
+      showQueryList = true
+      showQueryInput = true
+    }
+    this.setState({ showQueryList })
+    this.setState({ showQueryInput })
+  }
+
   handleCreateComplexEvent = (queryId: number, value: string) => {
     const complexEvents = [...this.state.complexEvents]
     complexEvents.push({
-      id: this.complexEventsNumber++,
+      id: this.complexEventNumber++,
       value: value,
       queryId: queryId,
     })
@@ -147,6 +158,7 @@ class App extends React.Component<AppProps, AppState> {
             onQuerySelection={this.handleQuerySelection}
             onDelete={this.handleDeleteQuery}
             queries={this.state.queries}
+            show={this.state.showQueryList}
           />
           <QueryInput
             onCreateQuery={this.handleCreateQuery}
@@ -159,6 +171,7 @@ class App extends React.Component<AppProps, AppState> {
             complexEvents={this.state.complexEvents}
             queries={this.state.queries}
             onCreateComplexEvent={this.handleCreateComplexEvent}
+            onComplexEventSelection={this.handleComplexEventSelection}
           />
         </Row>
       </div>
