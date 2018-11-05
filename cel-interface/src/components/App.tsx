@@ -4,65 +4,82 @@ import QueryInput from "./QueryInput"
 import QueryList from "./QueryList"
 import ComplexEventContainer from "./ComplexEventContainer"
 import { Row, Col, Label } from "react-bootstrap"
+import { database, lorem, commerce } from "faker/locale/en_US"
 
 export interface AppProps {}
 
 export interface AppState {
   queries: { id: number; value: string; color: string; description: string }[]
   complexEvents: { id: number; value: string; queryId: number }[]
+  showQueryInput: boolean
 }
 
 class App extends React.Component<AppProps, AppState> {
   queryNumber: number = 6
   complexEventsNumber: number = 13
 
+  data = this.createData()
+
   state = {
-    queries: [
-      {
-        id: 1,
-        value: "SELECT ALL T FROM STREAM",
-        color: "#A0C0E8",
-        description: "Query",
-      },
-      {
-        id: 2,
-        value: "SELECT (H, T) FROM STREAM",
-        color: "#939EAB",
-        description: "Query",
-      },
-      {
-        id: 3,
-        value: "SELECT ALL (H, T) FROM STREAM",
-        color: "#89A2C1",
-        description: "Query",
-      },
-      {
-        id: 4,
-        value: "SELECT T FROM STREAM",
-        color: "#BFC4CB",
-        description: "Query",
-      },
-      {
-        id: 5,
-        value: "SELECT MAX T FROM STREAM",
-        color: "#9AC3F7",
-        description: "Query",
-      },
-    ],
-    complexEvents: [
-      { id: 1, value: "ComplexEvent 1", queryId: 1 },
-      { id: 2, value: "ComplexEvent 2", queryId: 2 },
-      { id: 3, value: "ComplexEvent 3", queryId: 3 },
-      { id: 4, value: "ComplexEvent 4", queryId: 4 },
-      { id: 5, value: "ComplexEvent 5", queryId: 5 },
-      { id: 6, value: "ComplexEvent 6", queryId: 5 },
-      { id: 7, value: "ComplexEvent 7", queryId: 4 },
-      { id: 8, value: "ComplexEvent 8", queryId: 2 },
-      { id: 9, value: "ComplexEvent 9", queryId: 1 },
-      { id: 10, value: "ComplexEvent 10", queryId: 3 },
-      { id: 11, value: "ComplexEvent 11", queryId: 2 },
-      { id: 12, value: "ComplexEvent 12", queryId: 4 },
-    ],
+    queries: this.data.queries,
+    complexEvents: this.data.complexEvents,
+    showQueryInput: true,
+  }
+
+  createData() {
+    let queryNumber = 10
+    let value
+    let description
+    let color
+    let queries = []
+    for (let index = 1; index < queryNumber; index++) {
+      value = database.engine()
+      description = lorem.sentence()
+      color = this.getRandomColor()
+      queries.push({
+        id: index,
+        value: value,
+        description: description,
+        color: color,
+      })
+    }
+
+    let complexEventNumber = 13
+    let queryId
+    let complexEvents = []
+    let queriesLength = queries.length
+    for (let index = 1; index < complexEventNumber; index++) {
+      value = database.engine()
+      queryId = queries[Math.floor(Math.random() * queriesLength)].id
+      complexEvents.push({
+        id: index,
+        value: value,
+        queryId: queryId,
+      })
+    }
+
+    let data = { queries: queries, complexEvents: complexEvents }
+    return data
+  }
+
+  getRandomColor() {
+    let colorValues: string[] = [
+      "#A0C0E8",
+      "#939EAB",
+      "#89A2C1",
+      "#BFC4CB",
+      "#9AC3F7",
+    ]
+
+    return colorValues[Math.floor(Math.random() * colorValues.length)]
+  }
+
+  handleShowQueryInput = () => {
+    if (!this.state.showQueryInput) {
+      const showQueryInput = true
+      this.setState({ showQueryInput })
+      console.log(this.state.showQueryInput)
+    }
   }
 
   handleCreateQuery = (queryInput: string, queryDescription: string) => {
@@ -70,15 +87,30 @@ class App extends React.Component<AppProps, AppState> {
     queries.push({
       id: this.queryNumber++,
       value: queryInput,
-      color: "#BFC4CB",
+      color: this.getRandomColor(),
       description: queryDescription,
     })
     this.setState({ queries })
   }
 
+  handleQuerySelection = (id: number) => {
+    let showQueryInput = false
+    if (id === 0) {
+      showQueryInput = true
+    }
+    this.setState({ showQueryInput })
+  }
+
   handleDeleteQuery = (id: number) => {
+    const complexEvents = this.state.complexEvents.filter(
+      complexEvent => complexEvent.queryId != id,
+    )
     const queries = this.state.queries.filter(query => query.id != id)
+    const showQueryInput = true
+
+    this.setState({ complexEvents })
     this.setState({ queries })
+    this.setState({ showQueryInput })
   }
 
   handleCreateComplexEvent = (queryId: number, value: string) => {
@@ -100,14 +132,26 @@ class App extends React.Component<AppProps, AppState> {
 
         <Row>
           <Col sm={6}>
-            <QueryInput onCreateQuery={this.handleCreateQuery} />
+            <h2>
+              <Label bsStyle="default">Query list</Label>
+            </h2>
           </Col>
           <Col sm={6}>
-            <QueryList
-              onDelete={this.handleDeleteQuery}
-              queries={this.state.queries}
-            />
+            <h2>
+              <Label bsStyle="default">Write your Query!</Label>
+            </h2>
           </Col>
+        </Row>
+        <Row>
+          <QueryList
+            onQuerySelection={this.handleQuerySelection}
+            onDelete={this.handleDeleteQuery}
+            queries={this.state.queries}
+          />
+          <QueryInput
+            onCreateQuery={this.handleCreateQuery}
+            show={this.state.showQueryInput}
+          />
         </Row>
 
         <Row>

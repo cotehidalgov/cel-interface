@@ -25,22 +25,20 @@ class ComplexEventContainer extends React.Component<
   }
 
   componentDidMount() {
-    const script = document.createElement("script")
-    script.type = "text/javascript"
-    script.async = true
+    // const script = document.createElement("script")
+    // script.type = "text/javascript"
+    // script.async = true
     // s.innerHTML = "document.write('This is output by document.write()!')"
     // this.instance.appendChild(s)
-
-    function addDivs() {
-      var cont = document.getElementsByClassName("container")[0]
-      var str = '<div class="inner">Hi</div>'
-      cont.innerHTML += str
-    }
-
+    // function addDivs() {
+    //   var cont = document.getElementsByClassName("container")[0]
+    //   var str = '<div class="inner">Hi</div>'
+    //   cont.innerHTML += str
+    // }
     // setInterval(function() {
     //   addDivs()
     // }, 1000)
-    document.body.appendChild(script)
+    // document.body.appendChild(script)
   }
 
   addComplexEvent = () => {
