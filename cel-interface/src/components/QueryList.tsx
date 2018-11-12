@@ -1,6 +1,6 @@
 import * as React from "react"
 import Query from "./Query"
-import { PanelGroup, Panel, Col } from "react-bootstrap"
+import { PanelGroup, Panel, Col, Badge } from "react-bootstrap"
 import QueryInput from "./QueryInput"
 
 export interface QueryListProps {

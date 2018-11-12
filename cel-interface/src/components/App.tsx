@@ -3,14 +3,20 @@ import { Component } from "react"
 import QueryInput from "./QueryInput"
 import QueryList from "./QueryList"
 import ComplexEventContainer from "./ComplexEventContainer"
-import { Row, Col, Label } from "react-bootstrap"
-import { database, lorem, commerce } from "faker/locale/en_US"
+import { Row, Col, Label, Badge } from "react-bootstrap"
+import { database, lorem, random, date } from "faker/locale/en_US"
+import { max } from "moment"
 
 export interface AppProps {}
 
 export interface AppState {
   queries: { id: number; value: string; color: string; description: string }[]
-  complexEvents: { id: number; value: string; queryId: number }[]
+  complexEvents: {
+    id: number
+    value: string
+    queryId: number
+    eventsId: number[]
+  }[]
   showQueryInput: boolean
   showQueryList: boolean
 }
@@ -18,17 +24,28 @@ export interface AppState {
 class App extends React.Component<AppProps, AppState> {
   queryNumber: number = 10
   complexEventNumber: number = 13
+  dataNumber: number = 5000
 
-  data = this.createData(this.queryNumber, this.complexEventNumber)
+  information = this.createData(
+    this.queryNumber,
+    this.complexEventNumber,
+    this.dataNumber,
+  )
 
   state = {
-    queries: this.data.queries,
-    complexEvents: this.data.complexEvents,
+    queries: this.information.queries,
+    complexEvents: this.information.complexEvents,
+    data: this.information.data,
     showQueryInput: true,
     showQueryList: true,
   }
 
-  createData(queryNumber: number, complexEventNumber: number) {
+  createData(
+    queryNumber: number,
+    complexEventNumber: number,
+    dataNumber: number,
+  ) {
+    // Create Queries
     let value
     let description
     let color
@@ -45,21 +62,43 @@ class App extends React.Component<AppProps, AppState> {
       })
     }
 
+    // Create Data
+    let dataName
+    let dataDate
+    let data = []
+    for (let index = 1; index < dataNumber; index++) {
+      dataName = lorem.word()
+      value = random.number()
+      dataDate = date.past(5)
+      data.push({ id: index, name: dataName, value: value, date: dataDate })
+    }
+
+    // Create Complex Events
     let queryId
     let complexEvents = []
     let queriesLength = queries.length
+    let eventsId
     for (let index = 1; index < complexEventNumber; index++) {
+      eventsId = []
       value = database.engine()
       queryId = queries[Math.floor(Math.random() * queriesLength)].id
+      for (let number = 0; number < random.number(5) + 1; number++) {
+        eventsId.push(data[Math.floor(Math.random() * data.length)].id)
+      }
       complexEvents.push({
         id: index,
         value: value,
         queryId: queryId,
+        eventsId: eventsId,
       })
     }
 
-    let data = { queries: queries, complexEvents: complexEvents }
-    return data
+    let information = {
+      queries: queries,
+      complexEvents: complexEvents,
+      data: data,
+    }
+    return information
   }
 
   getRandomColor() {
@@ -96,7 +135,6 @@ class App extends React.Component<AppProps, AppState> {
       color: this.getRandomColor(),
       description: queryDescription,
     })
-    console.log(this.queryNumber)
     this.setState({ queries })
   }
 
@@ -130,6 +168,7 @@ class App extends React.Component<AppProps, AppState> {
       id: this.complexEventNumber++,
       value: value,
       queryId: queryId,
+      eventsId: [],
     })
     this.setState({ complexEvents })
   }
@@ -143,8 +182,11 @@ class App extends React.Component<AppProps, AppState> {
 
         <Row>
           <Col sm={6}>
-            <h2>
+            <h2 style={{ display: "-webkit-box" }}>
               <Label bsStyle="default">Query list</Label>
+              <p>
+                <Badge>{this.state.queries.length}</Badge>
+              </p>
             </h2>
           </Col>
           <Col sm={6}>
@@ -170,6 +212,7 @@ class App extends React.Component<AppProps, AppState> {
           <ComplexEventContainer
             complexEvents={this.state.complexEvents}
             queries={this.state.queries}
+            data={this.state.data}
             onCreateComplexEvent={this.handleCreateComplexEvent}
             onComplexEventSelection={this.handleComplexEventSelection}
           />

@@ -1,18 +1,36 @@
 import * as React from "react"
-import { Label, ListGroup, Button, PanelGroup, Panel } from "react-bootstrap"
+import {
+  Label,
+  ListGroup,
+  Button,
+  PanelGroup,
+  Panel,
+  Badge,
+} from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 import QueryInput from "./QueryInput"
 import { setInterval } from "timers"
 
 export interface ComplexEventContainerProps {
-  complexEvents: { id: number; value: string; queryId: number }[]
+  complexEvents: {
+    id: number
+    value: string
+    queryId: number
+    eventsId: number[]
+  }[]
   queries: { id: number; value: string; color: string }[]
+  data: { id: number; name: string; value: number; date: Date }[]
   onCreateComplexEvent: (queryId: number, value: string) => void
   onComplexEventSelection: (id: number) => void
 }
 
 export interface ComplexEventContainerState {
-  complexEvents: { id: number; value: string; queryId: number }[]
+  complexEvents: {
+    id: number
+    value: string
+    queryId: number
+    eventsId: number[]
+  }[]
   activeKey: number
 }
 
@@ -24,23 +42,6 @@ class ComplexEventContainer extends React.Component<
 
   componentWillReceiveProps(props: ComplexEventContainerProps) {
     this.setState({ complexEvents: props.complexEvents })
-  }
-
-  componentDidMount() {
-    // const script = document.createElement("script")
-    // script.type = "text/javascript"
-    // script.async = true
-    // s.innerHTML = "document.write('This is output by document.write()!')"
-    // this.instance.appendChild(s)
-    // function addDivs() {
-    //   var cont = document.getElementsByClassName("container")[0]
-    //   var str = '<div class="inner">Hi</div>'
-    //   cont.innerHTML += str
-    // }
-    // setInterval(function() {
-    //   addDivs()
-    // }, 1000)
-    // document.body.appendChild(script)
   }
 
   handleSelection = (activeKey: number) => {
@@ -57,23 +58,6 @@ class ComplexEventContainer extends React.Component<
     this.props.onCreateComplexEvent(1, "Complex Event")
   }
 
-  // getStyles = () => {
-  //   let style = {
-  //     display: "inline-flex",
-  //     // flexDirection: "row-reverse",
-  //   }
-  //   if (this.state.activeKey === 0) {
-  //     return style
-  //   }
-  //   let style2 = {
-  //     display: "inline-flex",
-  //     flexDirection: "row-reverse",
-  //     width: "100%",
-  //     height: "100%",
-  //   }
-  //   return style2
-  // }
-
   getWidth = () => {
     if (this.state.activeKey === 0) {
       return ""
@@ -88,7 +72,12 @@ class ComplexEventContainer extends React.Component<
     return "100%"
   }
 
-  renderPanels(complexEvent: { id: number; queryId: number; value: string }) {
+  renderPanels(complexEvent: {
+    id: number
+    queryId: number
+    value: string
+    eventsId: number[]
+  }) {
     if (
       this.state.activeKey === complexEvent.id ||
       this.state.activeKey === 0
@@ -113,8 +102,12 @@ class ComplexEventContainer extends React.Component<
               Complex Event {complexEvent.id} for Query {complexEvent.queryId}
             </Panel.Title>
           </Panel.Heading>
-          <Panel.Body collapsible style={{ height: "40vh" }}>
-            <ComplexEvent value={complexEvent.value} />
+          <Panel.Body collapsible style={{ minHeight: "40vh" }}>
+            <ComplexEvent
+              value={complexEvent.value}
+              eventsId={complexEvent.eventsId}
+              data={this.props.data}
+            />
           </Panel.Body>
         </Panel>
       )
@@ -124,8 +117,11 @@ class ComplexEventContainer extends React.Component<
   render() {
     return (
       <div>
-        <h2>
+        <h2 style={{ display: "-webkit-box" }}>
           <Label bsStyle="default">Complex Events</Label>
+          <p>
+            <Badge>{this.state.complexEvents.length}</Badge>
+          </p>
         </h2>
 
         <div
