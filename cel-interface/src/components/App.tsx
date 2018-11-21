@@ -2,20 +2,23 @@ import * as React from "react"
 import { Component } from "react"
 import QueryInput from "./QueryInput"
 import QueryList from "./QueryList"
-import ComplexEventContainer from "./ComplexEventContainer"
+import SetContainer from "./SetContainer"
 import { Row, Col, Label, Badge } from "react-bootstrap"
 import { database, lorem, random, date } from "faker/locale/en_US"
 import { max } from "moment"
 
 export interface AppProps {}
 
+// complex event pasa a ser query con evento que gatillo
+//  en el dia cuantas veces se ha gatillado ()
 export interface AppState {
   queries: { id: number; value: string; color: string; description: string }[]
+  sets: { id: number; queryId: number }[]
   complexEvents: {
     id: number
-    value: string
     queryId: number
     eventsId: number[]
+    setId: number
   }[]
   showQueryInput: boolean
   showQueryList: boolean
@@ -23,28 +26,25 @@ export interface AppState {
 
 class App extends React.Component<AppProps, AppState> {
   queryNumber: number = 10
-  complexEventNumber: number = 13
+  setNumber: number = 100
   dataNumber: number = 5000
 
   information = this.createData(
     this.queryNumber,
-    this.complexEventNumber,
+    this.setNumber,
     this.dataNumber,
   )
 
   state = {
     queries: this.information.queries,
+    sets: this.information.sets,
     complexEvents: this.information.complexEvents,
     data: this.information.data,
     showQueryInput: true,
     showQueryList: true,
   }
 
-  createData(
-    queryNumber: number,
-    complexEventNumber: number,
-    dataNumber: number,
-  ) {
+  createData(queryNumber: number, setNumber: number, dataNumber: number) {
     // Create Queries
     let value
     let description
@@ -73,28 +73,57 @@ class App extends React.Component<AppProps, AppState> {
       data.push({ id: index, name: dataName, value: value, date: dataDate })
     }
 
-    // Create Complex Events
+    // Create Complex Events and sets
     let queryId
     let complexEvents = []
+    // let complexEventsId
     let queriesLength = queries.length
+    let dataLength = data.length
     let eventsId
-    for (let index = 1; index < complexEventNumber; index++) {
+    let eventsLength
+    let sets = []
+    let complexEventNumber
+    let eventNumber
+    let subEventsId
+
+    for (let setIndex = 1; setIndex < setNumber; setIndex++) {
       eventsId = []
-      value = database.engine()
+      // complexEventsId = []
       queryId = queries[Math.floor(Math.random() * queriesLength)].id
-      for (let number = 0; number < random.number(5) + 1; number++) {
-        eventsId.push(data[Math.floor(Math.random() * data.length)].id)
+      eventsLength = random.number(10) + 1
+      for (let number = 0; number < eventsLength; number++) {
+        eventsId.push(data[Math.floor(Math.random() * dataLength)].id)
       }
-      complexEvents.push({
-        id: index,
-        value: value,
+      complexEventNumber = random.number(eventsLength * eventsLength) + 2
+      // For each complex Event that belongs to this set
+      for (
+        let complexEventIndex = 1;
+        complexEventIndex < complexEventNumber;
+        complexEventIndex++
+      ) {
+        eventNumber = random.number(eventsLength) + 1
+        subEventsId = []
+        for (let eventIndex = 0; eventIndex < eventNumber; eventIndex++) {
+          subEventsId.push(eventsId[Math.floor(Math.random() * eventsLength)])
+        }
+        complexEvents.push({
+          id: complexEventIndex,
+          queryId: queryId,
+          setId: setIndex,
+          eventsId: subEventsId,
+        })
+        // complexEventsId.push(complexEventIndex)
+      }
+
+      sets.push({
+        id: setIndex,
         queryId: queryId,
-        eventsId: eventsId,
       })
     }
 
     let information = {
       queries: queries,
+      sets: sets,
       complexEvents: complexEvents,
       data: data,
     }
@@ -138,6 +167,7 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ queries })
   }
 
+  // Delete fix
   handleDeleteQuery = (id: number) => {
     const complexEvents = this.state.complexEvents.filter(
       complexEvent => complexEvent.queryId != id,
@@ -151,7 +181,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   // bug: press query and then ce
-  handleComplexEventSelection = (id: number) => {
+  handleSetSelection = (id: number) => {
     let showQueryList = false
     let showQueryInput = false
     if (id === 0) {
@@ -162,15 +192,14 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ showQueryInput })
   }
 
-  handleCreateComplexEvent = (queryId: number, value: string) => {
-    const complexEvents = [...this.state.complexEvents]
-    complexEvents.push({
-      id: this.complexEventNumber++,
-      value: value,
-      queryId: queryId,
-      eventsId: [],
-    })
-    this.setState({ complexEvents })
+  handleCreateSet = (queryId: number, value: string) => {
+    // const complexEvents = [...this.state.complexEvents]
+    // complexEvents.push({
+    //   id: this.complexEventNumber++,
+    //   queryId: queryId,
+    //   eventsId: [],
+    // })
+    // this.setState({ complexEvents })
   }
 
   render() {
@@ -209,12 +238,13 @@ class App extends React.Component<AppProps, AppState> {
         </Row>
 
         <Row>
-          <ComplexEventContainer
+          <SetContainer
             complexEvents={this.state.complexEvents}
+            sets={this.state.sets}
             queries={this.state.queries}
             data={this.state.data}
-            onCreateComplexEvent={this.handleCreateComplexEvent}
-            onComplexEventSelection={this.handleComplexEventSelection}
+            onCreateSet={this.handleCreateSet}
+            onSetSelection={this.handleSetSelection}
           />
         </Row>
       </div>

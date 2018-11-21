@@ -8,40 +8,41 @@ import {
   Badge,
 } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
+import Set from "./Set"
+
 import QueryInput from "./QueryInput"
 import { setInterval } from "timers"
 
-export interface ComplexEventContainerProps {
+export interface SetContainerProps {
   complexEvents: {
     id: number
-    value: string
     queryId: number
     eventsId: number[]
+    setId: number
   }[]
+  sets: { id: number; queryId: number }[]
   queries: { id: number; value: string; color: string }[]
   data: { id: number; name: string; value: number; date: Date }[]
-  onCreateComplexEvent: (queryId: number, value: string) => void
-  onComplexEventSelection: (id: number) => void
+  onCreateSet: (queryId: number, value: string) => void
+  onSetSelection: (id: number) => void
 }
 
-export interface ComplexEventContainerState {
-  complexEvents: {
-    id: number
-    value: string
-    queryId: number
-    eventsId: number[]
-  }[]
+export interface SetContainerState {
+  sets: { id: number; queryId: number }[]
   activeKey: number
 }
 
-class ComplexEventContainer extends React.Component<
-  ComplexEventContainerProps,
-  ComplexEventContainerState
+class SetContainer extends React.Component<
+  SetContainerProps,
+  SetContainerState
 > {
-  state = { complexEvents: this.props.complexEvents, activeKey: 0 }
+  state = {
+    sets: this.props.sets,
+    activeKey: 0,
+  }
 
-  componentWillReceiveProps(props: ComplexEventContainerProps) {
-    this.setState({ complexEvents: props.complexEvents })
+  componentWillReceiveProps(props: SetContainerProps) {
+    this.setState({ sets: props.sets })
   }
 
   handleSelection = (activeKey: number) => {
@@ -49,13 +50,20 @@ class ComplexEventContainer extends React.Component<
       activeKey = 0
     }
     this.setState({ activeKey })
-    this.props.onComplexEventSelection(activeKey)
+    this.props.onSetSelection(activeKey)
   }
 
   addComplexEvent = () => {
     // This method will be a listener
     // Params: queryId, value
-    this.props.onCreateComplexEvent(1, "Complex Event")
+    this.props.onCreateSet(1, "Complex Event")
+  }
+
+  getQueryValue = (id: number) => {
+    let query = this.props.queries.filter(query => query.id == id)[0]
+    if (query) {
+      return query.value
+    } else return null
   }
 
   getWidth = () => {
@@ -72,40 +80,35 @@ class ComplexEventContainer extends React.Component<
     return "100%"
   }
 
-  renderPanels(complexEvent: {
-    id: number
-    queryId: number
-    value: string
-    eventsId: number[]
-  }) {
-    if (
-      this.state.activeKey === complexEvent.id ||
-      this.state.activeKey === 0
-    ) {
+  renderPanels(set: { id: number; queryId: number }) {
+    if (this.state.activeKey === set.id || this.state.activeKey === 0) {
+      let isActive = this.state.activeKey === set.id
       return (
         <Panel
-          eventKey={complexEvent.id}
+          eventKey={set.id}
           style={{
             display: "inline-block",
             margin: "5px",
             width: this.getWidth(),
+            // position: isActive ? "absolute" : null,
           }}
         >
           <Panel.Heading
             style={{
               background: this.props.queries.filter(
-                query => query.id == complexEvent.queryId,
+                query => query.id == set.queryId,
               )[0].color,
             }}
           >
             <Panel.Title toggle>
-              Complex Event {complexEvent.id} for Query {complexEvent.queryId}
+              Set {set.id} for Query {set.queryId}
             </Panel.Title>
           </Panel.Heading>
           <Panel.Body collapsible style={{ minHeight: "40vh" }}>
-            <ComplexEvent
-              value={complexEvent.value}
-              eventsId={complexEvent.eventsId}
+            <Set
+              id={set.id}
+              queryValue={this.getQueryValue(set.queryId)}
+              complexEvents={this.props.complexEvents}
               data={this.props.data}
             />
           </Panel.Body>
@@ -118,9 +121,9 @@ class ComplexEventContainer extends React.Component<
     return (
       <div>
         <h2 style={{ display: "-webkit-box" }}>
-          <Label bsStyle="default">Complex Events</Label>
+          <Label bsStyle="default">Sets</Label>
           <p>
-            <Badge>{this.state.complexEvents.length}</Badge>
+            <Badge>{this.state.sets.length}</Badge>
           </p>
         </h2>
 
@@ -135,19 +138,17 @@ class ComplexEventContainer extends React.Component<
             onSelect={this.handleSelection}
             style={{
               display: "inline-flex",
-              flexDirection: "row-reverse",
+              // flexDirection: "row-reverse",
               width: this.getWidth(),
             }}
           >
-            {this.state.complexEvents.map(complexEvent =>
-              this.renderPanels(complexEvent),
-            )}
+            {this.state.sets.map(set => this.renderPanels(set))}
           </PanelGroup>
         </div>
-        <Button onClick={this.addComplexEvent}>Add Complex Event</Button>
+        {/* <Button onClick={this.addComplexEvent}>Add Complex Event</Button> */}
       </div>
     )
   }
 }
 
-export default ComplexEventContainer
+export default SetContainer

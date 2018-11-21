@@ -83,7 +83,7 @@ class QueryList extends React.Component<QueryListProps, QueryListState> {
     } else return <div />
   }
 
-  renderQueryList() {
+  render() {
     if (this.props.show) {
       return (
         <div>
@@ -102,10 +102,6 @@ class QueryList extends React.Component<QueryListProps, QueryListState> {
         </div>
       )
     } else return <div />
-  }
-
-  render() {
-    return this.renderQueryList()
   }
 }
 
