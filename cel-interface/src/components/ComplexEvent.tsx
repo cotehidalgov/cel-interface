@@ -8,18 +8,34 @@ export interface ComplexEventProps {
 }
 
 export interface ComplexEventState {
+  id: number
   events: { id: number; name: string; value: number; date: Date }[]
+  activeKey: number
 }
 
 class ComplexEvent extends React.Component<
   ComplexEventProps,
   ComplexEventState
 > {
-  events = this.getData()
-  state = { events: this.events }
+  events = this.getData(this.props)
+  state = { id: this.props.id, events: this.events, activeKey: 0 }
 
   componentWillReceiveProps(props: ComplexEventProps) {
-    this.setState({ events: this.getData() })
+    console.log(props.id)
+    if (this.props.id != props.id) {
+      this.setState({ events: this.getData(props), id: props.id })
+    }
+  }
+
+  getData(props: ComplexEventProps) {
+    let events = []
+    let event
+    for (let index = 0; index < props.eventsId.length; index++) {
+      event = this.props.data[props.eventsId[index]]
+      events.push(event)
+    }
+    events.sort((e1, e2) => this.getValueDate(e1.date, e2.date))
+    return events
   }
 
   getValueDate(date1: Date, date2: Date) {
@@ -34,17 +50,6 @@ class ComplexEvent extends React.Component<
         else return 0
       }
     }
-  }
-
-  getData() {
-    let events = []
-    let event
-    for (let index = 0; index < this.props.eventsId.length; index++) {
-      event = this.props.data[this.props.eventsId[index]]
-      events.push(event)
-    }
-    events.sort((e1, e2) => this.getValueDate(e1.date, e2.date))
-    return events
   }
 
   getStringDate = (date: Date) => {
@@ -64,24 +69,32 @@ class ComplexEvent extends React.Component<
       <div>
         <h4 style={{ display: "-webkit-box" }}>
           <Label bsStyle="default">
-            Events for Complex Event {this.props.id}:
+            Events for Complex Event {this.props.id}
           </Label>
           <p>
             <Badge>{this.state.events.length}</Badge>
           </p>
         </h4>
-        <div className="pre-x-scrollable" style={{ overflow: "auto" }} />
-        <ListGroup style={{ display: "inline-flex" }}>
-          {this.state.events.map(event => (
-            <ListGroupItem style={{ display: "inline-block", margin: "5px" }}>
-              <h5>
-                <Label bsStyle="default">{event.name}</Label>
-              </h5>
-              <p>Value: {event.value}</p>
-              <p>Date: {this.getStringDate(event.date)}</p>
-            </ListGroupItem>
-          ))}
-        </ListGroup>
+        <div className="pre-x-scrollable" style={{ overflow: "auto" }}>
+          <ListGroup style={{ display: "inline-flex" }}>
+            {this.state.events.map(event => (
+              <ListGroupItem
+                style={{
+                  display: "inline-block",
+                  margin: "5px",
+                  width: "140px",
+                  height: "130px",
+                }}
+              >
+                <h5>
+                  <Label bsStyle="default">{event.name}</Label>
+                </h5>
+                <p>Value: {event.value}</p>
+                <p>Date: {this.getStringDate(event.date)}</p>
+              </ListGroupItem>
+            ))}
+          </ListGroup>
+        </div>
       </div>
     )
   }

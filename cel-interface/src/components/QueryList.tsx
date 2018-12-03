@@ -1,11 +1,22 @@
 import * as React from "react"
 import Query from "./Query"
-import { PanelGroup, Panel, Col, Badge } from "react-bootstrap"
+import {
+  PanelGroup,
+  Panel,
+  Col,
+  Badge,
+  Nav,
+  NavItem,
+  Label,
+  Button,
+} from "react-bootstrap"
 import QueryInput from "./QueryInput"
 
 export interface QueryListProps {
+  activeQueryId: number
   queries: { id: number; value: string; color: string; description: string }[]
   onQuerySelection: (id: number) => void
+  onCreateQuery: (queryInput: string, queryDescription: string) => void
   onDelete: (id: number) => void
   show: boolean
 }
@@ -13,20 +24,23 @@ export interface QueryListProps {
 export interface QueryListState {
   queries: { id: number; value: string; color: string }[]
   activeKey: number
+  showQueryInput: boolean
 }
 
 class QueryList extends React.Component<QueryListProps, QueryListState> {
   state = {
     queries: this.props.queries,
     activeKey: 0,
+    showQueryInput: false,
   }
 
   componentWillReceiveProps(props: QueryListProps) {
-    this.setState({ queries: props.queries })
+    this.setState({ queries: props.queries, activeKey: props.activeQueryId })
   }
 
   handleSelection = (activeKey: number) => {
-    if (this.state.activeKey != 0) {
+    console.log(activeKey)
+    if (this.state.activeKey == activeKey) {
       activeKey = 0
     }
     this.setState({ activeKey })
@@ -41,64 +55,86 @@ class QueryList extends React.Component<QueryListProps, QueryListState> {
     }
   }
 
-  getStyles = () => {
-    if (this.state.activeKey === 0) {
-      return {}
-    }
-    let style = { width: "100%" }
-    return style
+  handleCreateQuery = (queryInput: string, queryDescription: string) => {
+    this.props.onCreateQuery(queryInput, queryDescription)
   }
 
-  renderPanels = (query: {
-    id: number
-    description: string
-    value: string
-    color: string
-  }) => {
-    if (this.state.activeKey === query.id || this.state.activeKey === 0) {
+  renderQueryDescription() {
+    let query = this.state.queries.filter(
+      query => query.id == this.state.activeKey,
+    )
+    if (query.length != 0) {
       return (
         <div>
-          <Panel eventKey={query.id}>
-            <Panel.Heading
-              style={{
-                background: this.props.queries.filter(q => q.id == query.id)[0]
-                  .color,
-              }}
-            >
-              <Panel.Title toggle>{query.description}</Panel.Title>
-            </Panel.Heading>
-            <Panel.Body collapsible style={{ height: "35vh" }}>
-              <Query value={query.value} color={query.color} />
-              <button
-                onClick={() => this.handleDelete(query.id)}
-                type="button"
-                className="btn btn-danger pull-right"
-              >
-                Delete
-              </button>
-            </Panel.Body>
-          </Panel>
+          <h2>
+            <Label bsStyle="default">Query description</Label>
+          </h2>
+          <Query value={query[0].value} color={query[0].color} />
+          <button
+            onClick={() => this.handleDelete(query[0].id)}
+            type="button"
+            className="btn btn-danger pull-right"
+          >
+            Delete
+          </button>
         </div>
       )
-    } else return <div />
+    } else {
+      return <div />
+    }
   }
 
   render() {
+    let queryInputClose = () => this.setState({ showQueryInput: false })
+
     if (this.props.show) {
       return (
         <div>
-          <Col sm={6} style={this.getStyles()}>
+          <Col sm={6}>
+            <h2 style={{ display: "-webkit-box" }}>
+              <Label bsStyle="default">Query list</Label>
+              <p>
+                <Badge>{this.state.queries.length}</Badge>
+              </p>
+              <Button
+                bsStyle="default"
+                style={{ position: "absolute", right: "0px" }}
+                onClick={() => this.setState({ showQueryInput: true })}
+              >
+                Add query
+              </Button>
+            </h2>
             <div className="pre-scrollable" style={{ height: "300px" }}>
-              <PanelGroup
-                accordion
-                id="accordion-controlled-example"
+              <Nav
+                bsStyle="pills"
+                stacked={true}
                 activeKey={this.state.activeKey}
                 onSelect={this.handleSelection}
               >
-                {this.state.queries.map(query => this.renderPanels(query))}
-              </PanelGroup>
+                {this.state.queries.map((query, index) => (
+                  <NavItem
+                    eventKey={query.id}
+                    style={{
+                      borderRadius: "4px",
+                      backgroundImage: this.props.queries.filter(
+                        q => q.id == query.id,
+                      )[0].color,
+                    }}
+                  >
+                    {/* {index++} */}
+
+                    {query.description}
+                  </NavItem>
+                ))}
+              </Nav>
             </div>
           </Col>
+          <Col sm={6}>{this.renderQueryDescription()}</Col>
+          <QueryInput
+            show={this.state.showQueryInput}
+            onHide={queryInputClose}
+            onCreateQuery={this.handleCreateQuery}
+          />
         </div>
       )
     } else return <div />

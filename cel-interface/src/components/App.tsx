@@ -3,7 +3,9 @@ import { Component } from "react"
 import QueryInput from "./QueryInput"
 import QueryList from "./QueryList"
 import SetContainer from "./SetContainer"
-import { Row, Col, Label, Badge } from "react-bootstrap"
+import Set from "./Set"
+
+import { Row, Col, Label, Badge, Button } from "react-bootstrap"
 import { database, lorem, random, date } from "faker/locale/en_US"
 import { max } from "moment"
 
@@ -12,6 +14,9 @@ export interface AppProps {}
 // complex event pasa a ser query con evento que gatillo
 //  en el dia cuantas veces se ha gatillado ()
 export interface AppState {
+  activeQueryId: number
+  activeSetId: number
+
   queries: { id: number; value: string; color: string; description: string }[]
   sets: { id: number; queryId: number }[]
   complexEvents: {
@@ -20,12 +25,11 @@ export interface AppState {
     eventsId: number[]
     setId: number
   }[]
-  showQueryInput: boolean
   showQueryList: boolean
 }
 
 class App extends React.Component<AppProps, AppState> {
-  queryNumber: number = 10
+  queryNumber: number = 20
   setNumber: number = 100
   dataNumber: number = 5000
 
@@ -36,11 +40,12 @@ class App extends React.Component<AppProps, AppState> {
   )
 
   state = {
+    activeQueryId: 0,
+    activeSetId: 0,
     queries: this.information.queries,
     sets: this.information.sets,
     complexEvents: this.information.complexEvents,
     data: this.information.data,
-    showQueryInput: true,
     showQueryList: true,
   }
 
@@ -76,7 +81,6 @@ class App extends React.Component<AppProps, AppState> {
     // Create Complex Events and sets
     let queryId
     let complexEvents = []
-    // let complexEventsId
     let queriesLength = queries.length
     let dataLength = data.length
     let eventsId
@@ -88,7 +92,6 @@ class App extends React.Component<AppProps, AppState> {
 
     for (let setIndex = 1; setIndex < setNumber; setIndex++) {
       eventsId = []
-      // complexEventsId = []
       queryId = queries[Math.floor(Math.random() * queriesLength)].id
       eventsLength = random.number(10) + 1
       for (let number = 0; number < eventsLength; number++) {
@@ -112,7 +115,6 @@ class App extends React.Component<AppProps, AppState> {
           setId: setIndex,
           eventsId: subEventsId,
         })
-        // complexEventsId.push(complexEventIndex)
       }
 
       sets.push({
@@ -149,11 +151,10 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleQuerySelection = (id: number) => {
-    let showQueryInput = false
-    if (id === 0) {
-      showQueryInput = true
-    }
-    this.setState({ showQueryInput })
+    let activeQueryId = id
+    let activeSetId = 0
+
+    this.setState({ activeQueryId, activeSetId })
   }
 
   handleCreateQuery = (queryInput: string, queryDescription: string) => {
@@ -167,29 +168,19 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ queries })
   }
 
-  // Delete fix
   handleDeleteQuery = (id: number) => {
     const complexEvents = this.state.complexEvents.filter(
       complexEvent => complexEvent.queryId != id,
     )
+    const sets = this.state.sets.filter(set => set.queryId != id)
     const queries = this.state.queries.filter(query => query.id != id)
-    const showQueryInput = true
-
-    this.setState({ complexEvents })
-    this.setState({ queries })
-    this.setState({ showQueryInput })
+    let activeQueryId = 0
+    this.setState({ complexEvents, queries, sets, activeQueryId })
   }
 
-  // bug: press query and then ce
   handleSetSelection = (id: number) => {
-    let showQueryList = false
-    let showQueryInput = false
-    if (id === 0) {
-      showQueryList = true
-      showQueryInput = true
-    }
-    this.setState({ showQueryList })
-    this.setState({ showQueryInput })
+    let activeSetId = id
+    this.setState({ activeSetId })
   }
 
   handleCreateSet = (queryId: number, value: string) => {
@@ -202,43 +193,59 @@ class App extends React.Component<AppProps, AppState> {
     // this.setState({ complexEvents })
   }
 
+  getQuery = (id: number) => {
+    let query = this.state.queries.filter(query => query.id == id)[0]
+    if (query) {
+      return query
+    } else return null
+  }
+
+  renderSetDescription() {
+    let set = this.state.sets.filter(set => set.id == this.state.activeSetId)
+    if (set.length != 0) {
+      let query = this.state.queries.filter(
+        query => query.id == set[0].queryId,
+      )[0]
+      if (query) {
+        return (
+          <Set
+            id={set[0].id}
+            queryValue={query.value}
+            queryColor={query.color}
+            complexEvents={this.state.complexEvents}
+            data={this.state.data}
+          />
+        )
+      } else return undefined
+    } else {
+      return undefined
+    }
+  }
+
   render() {
     return (
       <div className="container">
         <h1>
           <Label bsStyle="primary">CEL Interface</Label>
         </h1>
-
         <Row>
           <Col sm={6}>
-            <h2 style={{ display: "-webkit-box" }}>
-              <Label bsStyle="default">Query list</Label>
-              <p>
-                <Badge>{this.state.queries.length}</Badge>
-              </p>
-            </h2>
+            <QueryList
+              activeQueryId={this.state.activeQueryId}
+              onQuerySelection={this.handleQuerySelection}
+              onCreateQuery={this.handleCreateQuery}
+              onDelete={this.handleDeleteQuery}
+              queries={this.state.queries}
+              show={this.state.showQueryList}
+            />
           </Col>
-          <Col sm={6}>
-            <h2>
-              <Label bsStyle="default">Write your Query!</Label>
-            </h2>
-          </Col>
-        </Row>
-        <Row>
-          <QueryList
-            onQuerySelection={this.handleQuerySelection}
-            onDelete={this.handleDeleteQuery}
-            queries={this.state.queries}
-            show={this.state.showQueryList}
-          />
-          <QueryInput
-            onCreateQuery={this.handleCreateQuery}
-            show={this.state.showQueryInput}
-          />
+          <Col sm={6}>{this.renderSetDescription()}</Col>
         </Row>
 
         <Row>
           <SetContainer
+            activeSetId={this.state.activeSetId}
+            queryId={this.state.activeQueryId}
             complexEvents={this.state.complexEvents}
             sets={this.state.sets}
             queries={this.state.queries}

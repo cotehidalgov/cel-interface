@@ -6,6 +6,8 @@ import {
   PanelGroup,
   Panel,
   Badge,
+  Nav,
+  NavItem,
 } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 import Set from "./Set"
@@ -14,6 +16,8 @@ import QueryInput from "./QueryInput"
 import { setInterval } from "timers"
 
 export interface SetContainerProps {
+  activeSetId: number
+  queryId: number
   complexEvents: {
     id: number
     queryId: number
@@ -30,6 +34,7 @@ export interface SetContainerProps {
 export interface SetContainerState {
   sets: { id: number; queryId: number }[]
   activeKey: number
+  activeQueryKeyId: number
 }
 
 class SetContainer extends React.Component<
@@ -39,14 +44,19 @@ class SetContainer extends React.Component<
   state = {
     sets: this.props.sets,
     activeKey: 0,
+    activeQueryKeyId: 0,
   }
 
   componentWillReceiveProps(props: SetContainerProps) {
-    this.setState({ sets: props.sets })
+    this.setState({
+      sets: props.sets,
+      activeQueryKeyId: props.queryId,
+      activeKey: props.activeSetId,
+    })
   }
 
   handleSelection = (activeKey: number) => {
-    if (this.state.activeKey != 0) {
+    if (this.state.activeKey == activeKey) {
       activeKey = 0
     }
     this.setState({ activeKey })
@@ -59,71 +69,42 @@ class SetContainer extends React.Component<
     this.props.onCreateSet(1, "Complex Event")
   }
 
-  getQueryValue = (id: number) => {
-    let query = this.props.queries.filter(query => query.id == id)[0]
-    if (query) {
-      return query.value
-    } else return null
-  }
-
-  getWidth = () => {
-    if (this.state.activeKey === 0) {
-      return ""
-    }
-    return "100%"
-  }
-
-  getHeight = () => {
-    if (this.state.activeKey === 0) {
-      return ""
-    }
-    return "100%"
-  }
-
-  renderPanels(set: { id: number; queryId: number }) {
-    if (this.state.activeKey === set.id || this.state.activeKey === 0) {
-      let isActive = this.state.activeKey === set.id
+  renderNavs(set: { id: number; queryId: number }) {
+    if (
+      this.state.activeQueryKeyId === set.queryId ||
+      this.state.activeQueryKeyId === 0
+    ) {
       return (
-        <Panel
+        <NavItem
           eventKey={set.id}
           style={{
             display: "inline-block",
             margin: "5px",
-            width: this.getWidth(),
-            // position: isActive ? "absolute" : null,
+            width: "25vh",
+            borderRadius: "4px",
+            backgroundImage: this.props.queries.filter(
+              query => query.id == set.queryId,
+            )[0].color,
           }}
         >
-          <Panel.Heading
-            style={{
-              background: this.props.queries.filter(
-                query => query.id == set.queryId,
-              )[0].color,
-            }}
-          >
-            <Panel.Title toggle>
-              Set {set.id} for Query {set.queryId}
-            </Panel.Title>
-          </Panel.Heading>
-          <Panel.Body collapsible style={{ minHeight: "40vh" }}>
-            <Set
-              id={set.id}
-              queryValue={this.getQueryValue(set.queryId)}
-              complexEvents={this.props.complexEvents}
-              data={this.props.data}
-            />
-          </Panel.Body>
-        </Panel>
+          Set {set.id} for Query {set.queryId}
+        </NavItem>
       )
     } else return <div />
   }
 
   render() {
+    let sets = this.state.sets.filter(
+      set =>
+        set.queryId == this.state.activeQueryKeyId ||
+        this.state.activeQueryKeyId === 0,
+    )
     return (
       <div>
         <h2 style={{ display: "-webkit-box" }}>
           <Label bsStyle="default">Sets</Label>
           <p>
-            <Badge>{this.state.sets.length}</Badge>
+            <Badge>{sets.length}</Badge>
           </p>
         </h2>
 
@@ -131,19 +112,16 @@ class SetContainer extends React.Component<
           className="pre-x-scrollable"
           style={{ height: "100%", width: "100%", overflow: "auto" }}
         >
-          <PanelGroup
-            accordion
-            id="accordion-controlled-example"
+          <Nav
+            bsStyle="pills"
             activeKey={this.state.activeKey}
             onSelect={this.handleSelection}
             style={{
               display: "inline-flex",
-              // flexDirection: "row-reverse",
-              width: this.getWidth(),
             }}
           >
-            {this.state.sets.map(set => this.renderPanels(set))}
-          </PanelGroup>
+            {sets.map(set => this.renderNavs(set))}
+          </Nav>
         </div>
         {/* <Button onClick={this.addComplexEvent}>Add Complex Event</Button> */}
       </div>

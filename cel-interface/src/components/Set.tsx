@@ -12,6 +12,7 @@ import ComplexEvent from "./ComplexEvent"
 export interface SetProps {
   id: number
   queryValue: string
+  queryColor: string
   complexEvents: {
     id: number
     queryId: number
@@ -41,6 +42,15 @@ class Set extends React.Component<SetProps, SetState> {
     activeKey: 0,
   }
 
+  componentWillReceiveProps(props: SetProps) {
+    this.setState({
+      complexEvents: props.complexEvents.filter(
+        complexEvent => complexEvent.setId == props.id,
+      ),
+      activeKey: 0,
+    })
+  }
+
   getComplexEvents() {
     let complexEvents = this.props.complexEvents.filter(
       complexEvent => complexEvent.setId == this.props.id,
@@ -50,7 +60,6 @@ class Set extends React.Component<SetProps, SetState> {
 
   getEvents(activeKey: number) {
     let complexEvents = this.state.complexEvents.filter(complexEvent => {
-      console.log(complexEvent.id, complexEvent.eventsId)
       return complexEvent.id == activeKey
     })
     if (complexEvents[0]) return complexEvents[0].eventsId
@@ -63,10 +72,10 @@ class Set extends React.Component<SetProps, SetState> {
     let complexEvents = this.state.complexEvents.filter(complexEvent => {
       return complexEvent.id == activeKey
     })
-    if (complexEvents[0]) {
+
+    if (complexEvents.length != 0) {
       activeEventsId = complexEvents[0].eventsId
-      this.setState({ activeEventsId })
-      this.setState({ activeKey })
+      this.setState({ activeEventsId, activeKey })
     }
   }
 
@@ -79,15 +88,17 @@ class Set extends React.Component<SetProps, SetState> {
           data={this.props.data}
         />
       )
-    } else return <div />
+    } else return undefined
   }
 
   render() {
     return (
       <div>
-        <p>Query: {this.props.queryValue}</p>
+        <h2>
+          <Label bsStyle="default">Set description</Label>
+        </h2>
         <h4 style={{ display: "-webkit-box" }}>
-          <Label bsStyle="default">Complex Events:</Label>
+          <Label bsStyle="default">Complex Events</Label>
           <p>
             <Badge>{this.state.complexEvents.length}</Badge>
           </p>
@@ -101,9 +112,11 @@ class Set extends React.Component<SetProps, SetState> {
               <Button
                 style={{
                   margin: "5px",
-                  height: "15vh",
+                  height: "50px",
                   display: "inline-block",
+                  background: this.props.queryColor,
                 }}
+                key={complexEvent.id}
                 onClick={() => this.handleSelection(complexEvent.id)}
               >
                 Complex Event {complexEvent.id}

@@ -7,6 +7,7 @@ import {
   Col,
   HelpBlock,
   Alert,
+  Modal,
 } from "react-bootstrap"
 import * as monacoEditor from "react-monaco-editor"
 import MonacoEditor from "react-monaco-editor"
@@ -14,6 +15,7 @@ import { CEL_FORMAT, CEL_CONF, CEL_THEME } from "../cel"
 
 export interface QueryInputProps {
   onCreateQuery: (queryInput: string, queryDescription: string) => void
+  onHide: () => void
   show: boolean
 }
 
@@ -36,10 +38,17 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
       )
       this.state.queryInput = ""
       this.queryDescriptionInput.value = ""
+      this.props.onHide()
     } else {
       let showAlert = true
       this.setState({ showAlert })
     }
+  }
+
+  closeModal = () => {
+    let showAlert = false
+    this.setState({ showAlert })
+    this.props.onHide()
   }
 
   editorWillMount: monacoEditor.EditorWillMount = monaco => {
@@ -93,39 +102,52 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
     if (this.props.show) {
       return (
         <div>
-          <Col sm={6}>
-            <FormGroup controlId="formControlsTextarea">
-              <MonacoEditor
-                width="500"
-                height="100"
-                theme="vs-light"
-                language="cel"
-                value={queryInput}
-                options={options}
-                onChange={this.onChange}
-                editorDidMount={this.editorDidMount}
-                editorWillMount={this.editorWillMount}
-              />
-              <br />
-              <FormControl
-                bsSize="small"
-                style={{ resize: "none", height: "20vh", width: "40vw" }}
-                componentClass="textarea"
-                placeholder="Query description..."
-                inputRef={input => (this.queryDescriptionInput = input)}
-              />
-            </FormGroup>
-            {this.renderAlert()}
-
-            <Button onClick={this.addQuery}>Add query</Button>
-          </Col>
+          <FormGroup controlId="formControlsTextarea">
+            <FormControl
+              type="text"
+              style={{ resize: "none" }}
+              componentClass="textarea"
+              placeholder="Query title..."
+              inputRef={input => (this.queryDescriptionInput = input)}
+            />
+            <br />
+            <MonacoEditor
+              height="50"
+              theme="vs-light"
+              language="cel"
+              value={queryInput}
+              options={options}
+              onChange={this.onChange}
+              editorDidMount={this.editorDidMount}
+              editorWillMount={this.editorWillMount}
+            />
+          </FormGroup>
+          {this.renderAlert()}
         </div>
       )
     } else return <div />
   }
 
   render() {
-    return this.renderQueryInput()
+    return (
+      <Modal
+        {...this.props}
+        bsSize="large"
+        aria-labelledby="contained-modal-title-lg"
+        onExited={this.closeModal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-lg">
+            Write your query!
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{this.renderQueryInput()}</Modal.Body>
+        <Modal.Footer>
+          <Button onClick={this.addQuery}>Add query</Button>
+          <Button onClick={this.closeModal}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    )
   }
 }
 
