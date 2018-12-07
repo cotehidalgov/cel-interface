@@ -66,19 +66,6 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
     this.state.queryInput = newValue
   }
 
-  // getQueryValidationState() {
-  //   const length = this.state.queryInput.length
-  //   console.log(length)
-
-  //   if (length === 0) return "error"
-  //   else return "success"
-  // }
-
-  // getDescriptionValidationState() {
-  //   if (this.queryDescriptionInput) return "error"
-  //   else return "success"
-  // }
-
   renderAlert = () => {
     if (this.state.showAlert) {
       return (
@@ -112,7 +99,7 @@ class QueryInput extends React.Component<QueryInputProps, QueryInputState> {
             />
             <br />
             <MonacoEditor
-              height="50"
+              height="150"
               theme="vs-light"
               language="cel"
               value={queryInput}

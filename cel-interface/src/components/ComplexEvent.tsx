@@ -83,7 +83,7 @@ class ComplexEvent extends React.Component<
                   display: "inline-block",
                   margin: "5px",
                   width: "140px",
-                  height: "130px",
+                  height: "120px",
                 }}
               >
                 <h5>

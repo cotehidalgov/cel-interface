@@ -8,6 +8,7 @@ import Set from "./Set"
 import { Row, Col, Label, Badge, Button } from "react-bootstrap"
 import { database, lorem, random, date } from "faker/locale/en_US"
 import { max } from "moment"
+import Query from "./Query"
 
 export interface AppProps {}
 
@@ -29,7 +30,7 @@ export interface AppState {
 }
 
 class App extends React.Component<AppProps, AppState> {
-  queryNumber: number = 20
+  queryNumber: number = 5
   setNumber: number = 100
   dataNumber: number = 5000
 
@@ -50,13 +51,17 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   createData(queryNumber: number, setNumber: number, dataNumber: number) {
+    let queryValues = [
+      "SELECT follower_id \n FROM Tweets, Follows \n WHERE (T; F) \n FILTER T[content LIKE ‘%#VoteOption1%’] \n PARTITION BY [tweeter_id, followee_id] \n WITHIN 2 seconds",
+      "SELECT LAST tweeter_id, follower_id \n FROM Retweets, Follows \n WHERE (((R; F) OR (F; R)); U) \n PARTITION BY [retweeter_id, follower_id], \n [tweeter_id, followee_id]",
+    ]
     // Create Queries
     let value
     let description
     let color
     let queries = []
     for (let index = 1; index < queryNumber; index++) {
-      value = database.engine()
+      value = queryValues[0]
       description = lorem.sentence()
       color = this.getRandomColor()
       queries.push({
@@ -67,12 +72,26 @@ class App extends React.Component<AppProps, AppState> {
       })
     }
 
+    for (let index = queryNumber; index < queryNumber * 2; index++) {
+      value = queryValues[1]
+      description = lorem.sentence()
+      color = this.getRandomColor()
+      queries.push({
+        id: index,
+        value: value,
+        description: description,
+        color: color,
+      })
+    }
+
+    let streamNames = ["Tweet", "Follow", "Retweet", "Like"]
     // Create Data
     let dataName
     let dataDate
     let data = []
     for (let index = 1; index < dataNumber; index++) {
-      dataName = lorem.word()
+      dataName = streamNames[Math.floor(Math.random() * streamNames.length)]
+
       value = random.number()
       dataDate = date.past(5)
       data.push({ id: index, name: dataName, value: value, date: dataDate })
@@ -169,13 +188,15 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleDeleteQuery = (id: number) => {
-    const complexEvents = this.state.complexEvents.filter(
-      complexEvent => complexEvent.queryId != id,
-    )
-    const sets = this.state.sets.filter(set => set.queryId != id)
-    const queries = this.state.queries.filter(query => query.id != id)
-    let activeQueryId = 0
-    this.setState({ complexEvents, queries, sets, activeQueryId })
+    if (window.confirm("Are you sure you wish to delete this item?")) {
+      const activeQueryId = 0
+      const complexEvents = this.state.complexEvents.filter(
+        complexEvent => complexEvent.queryId != id,
+      )
+      const sets = this.state.sets.filter(set => set.queryId != id)
+      const queries = this.state.queries.filter(query => query.id != id)
+      this.setState({ complexEvents, queries, sets, activeQueryId })
+    }
   }
 
   handleSetSelection = (id: number) => {
@@ -183,15 +204,7 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ activeSetId })
   }
 
-  handleCreateSet = (queryId: number, value: string) => {
-    // const complexEvents = [...this.state.complexEvents]
-    // complexEvents.push({
-    //   id: this.complexEventNumber++,
-    //   queryId: queryId,
-    //   eventsId: [],
-    // })
-    // this.setState({ complexEvents })
-  }
+  handleCreateSet = (queryId: number, value: string) => {}
 
   getQuery = (id: number) => {
     let query = this.state.queries.filter(query => query.id == id)[0]
@@ -200,17 +213,61 @@ class App extends React.Component<AppProps, AppState> {
     } else return null
   }
 
+  renderQueryDescription() {
+    let query = this.state.queries.filter(
+      query => query.id == this.state.activeQueryId,
+    )[0]
+    if (query && this.state.activeSetId == 0) {
+      return (
+        <div
+          style={{
+            background: "#F5F5F5",
+            borderRadius: "4px",
+            paddingLeft: "5px",
+          }}
+        >
+          <h2
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Label bsStyle="default">Query description</Label>
+            <button
+              onClick={() => this.handleDeleteQuery(query.id)}
+              type="button"
+              style={{ position: "absolute", right: "0px" }}
+              className="btn btn-danger "
+            >
+              Delete
+            </button>
+          </h2>
+          <br />
+          <Query value={query.value} color={query.color} />
+          <br />
+          <h4>
+            <Label bsStyle="default">Statistics</Label>
+          </h4>
+          <p>New results 5 times a day</p>
+        </div>
+      )
+    } else {
+      return undefined
+    }
+  }
+
   renderSetDescription() {
-    let set = this.state.sets.filter(set => set.id == this.state.activeSetId)
-    if (set.length != 0) {
-      let query = this.state.queries.filter(
-        query => query.id == set[0].queryId,
-      )[0]
+    let set = this.state.sets.filter(set => set.id == this.state.activeSetId)[0]
+    if (set) {
+      let query = this.state.queries.filter(query => query.id == set.queryId)[0]
       if (query) {
         return (
           <Set
-            id={set[0].id}
+            id={set.id}
             queryValue={query.value}
+            queryId={query.id}
             queryColor={query.color}
             complexEvents={this.state.complexEvents}
             data={this.state.data}
@@ -222,6 +279,10 @@ class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  // Al apretar query, que aparsca query description con estadisticas
+  // Luego de eso, poder apretar query y vovler a query description
+  // Poner datos más bonitos
+
   render() {
     return (
       <div className="container">
@@ -229,7 +290,7 @@ class App extends React.Component<AppProps, AppState> {
           <Label bsStyle="primary">CEL Interface</Label>
         </h1>
         <Row>
-          <Col sm={6}>
+          <Col sm={3}>
             <QueryList
               activeQueryId={this.state.activeQueryId}
               onQuerySelection={this.handleQuerySelection}
@@ -239,8 +300,17 @@ class App extends React.Component<AppProps, AppState> {
               show={this.state.showQueryList}
             />
           </Col>
-          <Col sm={6}>{this.renderSetDescription()}</Col>
+          <Col sm={9}>
+            <Row style={{ paddingLeft: "10px" }}>
+              {this.renderQueryDescription()}
+            </Row>
+            <Row style={{ paddingLeft: "10px" }}>
+              {this.renderSetDescription()}
+            </Row>
+          </Col>
         </Row>
+
+        <Row />
 
         <Row>
           <SetContainer

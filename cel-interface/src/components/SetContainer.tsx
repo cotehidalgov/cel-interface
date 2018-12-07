@@ -8,13 +8,15 @@ import {
   Badge,
   Nav,
   NavItem,
+  ButtonGroup,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 import Set from "./Set"
 
 import QueryInput from "./QueryInput"
 import { setInterval } from "timers"
-
 export interface SetContainerProps {
   activeSetId: number
   queryId: number
@@ -55,7 +57,7 @@ class SetContainer extends React.Component<
     })
   }
 
-  handleSelection = (activeKey: number) => {
+  handleSelection(activeKey: number) {
     if (this.state.activeKey == activeKey) {
       activeKey = 0
     }
@@ -63,10 +65,10 @@ class SetContainer extends React.Component<
     this.props.onSetSelection(activeKey)
   }
 
-  addComplexEvent = () => {
-    // This method will be a listener
-    // Params: queryId, value
-    this.props.onCreateSet(1, "Complex Event")
+  renderTitle() {
+    if (this.state.activeQueryKeyId != 0)
+      return "for Query number " + this.state.activeQueryKeyId.toString()
+    else return ""
   }
 
   renderNavs(set: { id: number; queryId: number }) {
@@ -75,20 +77,21 @@ class SetContainer extends React.Component<
       this.state.activeQueryKeyId === 0
     ) {
       return (
-        <NavItem
-          eventKey={set.id}
+        <Button
+          key={set.id}
+          onClick={() => this.handleSelection(set.id)}
           style={{
-            display: "inline-block",
-            margin: "5px",
-            width: "25vh",
-            borderRadius: "4px",
-            backgroundImage: this.props.queries.filter(
+            background: this.props.queries.filter(
               query => query.id == set.queryId,
             )[0].color,
+            display: "inline-block",
+            margin: "5px",
+            height: "10vh",
+            borderRadius: "4px",
           }}
         >
           Set {set.id} for Query {set.queryId}
-        </NavItem>
+        </Button>
       )
     } else return <div />
   }
@@ -102,7 +105,7 @@ class SetContainer extends React.Component<
     return (
       <div>
         <h2 style={{ display: "-webkit-box" }}>
-          <Label bsStyle="default">Sets</Label>
+          <Label bsStyle="default">Sets {this.renderTitle()}</Label>
           <p>
             <Badge>{sets.length}</Badge>
           </p>
@@ -112,18 +115,14 @@ class SetContainer extends React.Component<
           className="pre-x-scrollable"
           style={{ height: "100%", width: "100%", overflow: "auto" }}
         >
-          <Nav
-            bsStyle="pills"
-            activeKey={this.state.activeKey}
-            onSelect={this.handleSelection}
+          <ButtonGroup
             style={{
               display: "inline-flex",
             }}
           >
             {sets.map(set => this.renderNavs(set))}
-          </Nav>
+          </ButtonGroup>
         </div>
-        {/* <Button onClick={this.addComplexEvent}>Add Complex Event</Button> */}
       </div>
     )
   }

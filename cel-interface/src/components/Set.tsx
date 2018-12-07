@@ -6,12 +6,16 @@ import {
   ButtonGroup,
   Button,
   Badge,
+  OverlayTrigger,
+  Tooltip,
+  Row,
 } from "react-bootstrap"
 import ComplexEvent from "./ComplexEvent"
 
 export interface SetProps {
   id: number
   queryValue: string
+  queryId: number
   queryColor: string
   complexEvents: {
     id: number
@@ -58,25 +62,28 @@ class Set extends React.Component<SetProps, SetState> {
     return complexEvents
   }
 
-  getEvents(activeKey: number) {
-    let complexEvents = this.state.complexEvents.filter(complexEvent => {
-      return complexEvent.id == activeKey
-    })
-    if (complexEvents[0]) return complexEvents[0].eventsId
-    else return []
-  }
+  // getEvents(activeKey: number) {
+  //   let complexEvents = this.state.complexEvents.filter(complexEvent => {
+  //     return complexEvent.id == activeKey
+  //   })
+  //   if (complexEvents[0]) return complexEvents[0].eventsId
+  //   else return []
+  // }
 
-  handleSelection(complexEventId: number) {
-    let activeKey = complexEventId
-    let activeEventsId
-    let complexEvents = this.state.complexEvents.filter(complexEvent => {
-      return complexEvent.id == activeKey
-    })
-
-    if (complexEvents.length != 0) {
-      activeEventsId = complexEvents[0].eventsId
-      this.setState({ activeEventsId, activeKey })
+  handleSelection(activeKey: number) {
+    if (this.state.activeKey == activeKey) {
+      activeKey = 0
     }
+    let activeEventsId
+    let setComplexEvent = this.state.complexEvents.filter(complexEvent => {
+      return complexEvent.id == activeKey
+    })[0]
+
+    if (setComplexEvent) {
+      activeEventsId = setComplexEvent.eventsId
+      this.setState({ activeEventsId })
+    }
+    this.setState({ activeKey })
   }
 
   renderComplexEvent() {
@@ -91,12 +98,54 @@ class Set extends React.Component<SetProps, SetState> {
     } else return undefined
   }
 
+  getEvents = (eventsId: number[]) => {
+    let events = this.props.data.filter(event => {
+      eventsId.forEach(id => {
+        if (id == event.id) return true
+        return false
+      })
+    })
+    return events
+  }
+
+  getComplexEventTimes() {
+    let times: Date[] = []
+    this.complexEvents.map(complexEvent => {
+      let events = this.getEvents(complexEvent.eventsId)
+      let lastEvent = events[events.length - 1]
+      times.push(lastEvent.date)
+    })
+  }
+
+  renderStatistics() {
+    if (this.state.activeKey == 0) {
+      return (
+        <div>
+          <h4>
+            <Label bsStyle="default">Statistics</Label>
+          </h4>
+          <p>Five times a day</p>
+        </div>
+      )
+    } else return undefined
+  }
+
   render() {
     return (
-      <div>
+      <div
+        style={{
+          background: "#F5F5F5",
+          borderRadius: "4px",
+          paddingLeft: "5px",
+        }}
+      >
         <h2>
-          <Label bsStyle="default">Set description</Label>
+          <Label bsStyle="default">
+            Set description for Query {this.props.queryId}
+          </Label>
         </h2>
+        <br />
+
         <h4 style={{ display: "-webkit-box" }}>
           <Label bsStyle="default">Complex Events</Label>
           <p>
@@ -125,6 +174,7 @@ class Set extends React.Component<SetProps, SetState> {
           </ButtonGroup>
         </div>
         {this.renderComplexEvent()}
+        {this.renderStatistics()}
       </div>
     )
   }
